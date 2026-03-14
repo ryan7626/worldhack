@@ -50,7 +50,7 @@ export default function Home() {
       <NetworkBackground />
       
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-(--bg-main)">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
         <div className="max-w-screen-2xl mx-auto px-6 py-6 flex items-center justify-between">
           <div>
             <h1 className="text-sm font-bold tracking-widest text-primary uppercase">
@@ -280,44 +280,55 @@ export default function Home() {
 
       {/* Fullscreen Lightbox */}
       {showLightbox && (worldUrl || splatUrl) && (
-        <div className="fixed inset-0 z-[100] bg-[var(--bg-main)] flex flex-col">
-          {/* Lightbox header */}
-          <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100">
-            <div>
-              <h2 className="text-sm font-bold tracking-widest uppercase text-primary">Your Memory World</h2>
-              {worldCaption && (
-                <p className="text-xs text-muted uppercase tracking-widest mt-1 font-medium">
-                  {worldCaption.split(". ").slice(0, 2).join(". ") + "."}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-6">
-              {worldUrl && (
-                <a
-                  href={worldUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-6 py-3 border border-primary text-xs text-primary font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        <div className="fixed inset-0 z-100 bg-(--bg-main)">
+          {/* Floating Controls */}
+          <div className="absolute top-8 right-8 z-110 flex items-center gap-4 group/controls">
+            {worldCaption && (
+              <div className="relative group/info">
+                <div className="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md text-primary border border-primary/20 hover:bg-primary hover:text-white transition-all font-bold shadow-xl cursor-help">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Open in Marble
-                </a>
-              )}
-              <button
-                onClick={() => setShowLightbox(false)}
-                className="w-12 h-12 flex items-center justify-center text-primary border border-primary hover:bg-primary hover:text-white transition-all font-bold"
+                </div>
+                
+                {/* Caption Popup */}
+                <div className="absolute top-14 right-0 w-80 p-6 bg-white/95 backdrop-blur-xl border border-primary/20 shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover/info:opacity-100 group-hover/info:translate-y-0 transition-all duration-300">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-black mb-3 border-b border-primary/10 pb-2">
+                    Memory Reconstruction
+                  </p>
+                  <p className="text-xs text-main leading-relaxed tracking-wide font-medium italic">
+                    "{worldCaption}"
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {worldUrl && (
+              <a
+                href={worldUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 bg-white/10 backdrop-blur-md border border-primary/20 text-xs text-primary font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all flex items-center gap-2 shadow-xl"
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
-              </button>
-            </div>
+                Open in Marble
+              </a>
+            )}
+            <button
+              onClick={() => setShowLightbox(false)}
+              className="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md text-primary border border-primary/20 hover:bg-primary hover:text-white transition-all font-bold shadow-xl"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
+
           {/* Fullscreen world viewer */}
-          <div className="flex-1">
+          <div className="w-full h-full">
             <WorldViewer
               worldUrl={worldUrl}
               splatUrl={splatUrl}
@@ -329,6 +340,7 @@ export default function Home() {
           </div>
         </div>
       )}
+
     </main>
   );
 }

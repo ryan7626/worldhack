@@ -147,12 +147,8 @@ export function WorldViewer({
   const sizeClass = fullscreen ? "w-full h-full" : "aspect-video w-full";
 
   return (
-    <div className={`relative border border-slate-100 bg-white group ${fullscreen ? "w-full h-full" : ""}`}>
-      {caption && (
-        <div className="absolute top-0 left-0 right-0 z-10 border-b border-primary/10 bg-white/80 backdrop-blur px-6 py-4">
-          <p className="text-primary text-xs uppercase tracking-widest leading-loose font-bold">{caption}</p>
-        </div>
-      )}
+    <div className={`relative border border-slate-100 bg-white group ${fullscreen ? "w-full h-full border-none" : ""}`}>
+
 
       {/* 3D splat renderer container */}
       <div ref={containerRef} className={sizeClass}>
