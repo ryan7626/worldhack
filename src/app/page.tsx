@@ -16,6 +16,7 @@ export default function Home() {
   const [splatUrl, setSplatUrl] = useState<string | undefined>();
   const [worldCaption, setWorldCaption] = useState<string | undefined>();
   const [isGeneratingWorld, setIsGeneratingWorld] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const [highlightedPhotoIds, setHighlightedPhotoIds] = useState<string[]>([]);
 
   // Load existing photos on mount
@@ -162,6 +163,18 @@ export default function Home() {
                   isGenerating={isGeneratingWorld}
                 />
 
+                {generationError && (
+                  <div className="glass rounded-2xl p-6 text-center space-y-3">
+                    <p className="text-sm text-red-400">{generationError}</p>
+                    <button
+                      onClick={() => setGenerationError(null)}
+                      className="px-4 py-2 rounded-xl bg-surface-lighter text-white/70 hover:text-white transition-colors text-sm"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
                 {/* World generation controls */}
                 {!worldUrl && !isGeneratingWorld && photos.length > 0 && (
                   <div className="glass rounded-2xl p-6 text-center space-y-3">
@@ -184,6 +197,7 @@ export default function Home() {
                           key={photo.id}
                           onClick={async () => {
                             setIsGeneratingWorld(true);
+                            setGenerationError(null);
                             setHighlightedPhotoIds([photo.id]);
                             try {
                               const res = await fetch("/api/generate-world", {
@@ -195,12 +209,19 @@ export default function Home() {
                                 }),
                               });
                               const data = await res.json();
-                              if (data.worldUrl) {
+                              if (data.error) {
+                                setGenerationError(data.details || data.error);
+                                setIsGeneratingWorld(false);
+                              } else if (data.worldUrl) {
                                 handleWorldGenerated(data.worldUrl, data.splatUrl);
                                 if (data.caption) setWorldCaption(data.caption);
+                              } else {
+                                setGenerationError("World generation timed out. Try again.");
+                                setIsGeneratingWorld(false);
                               }
                             } catch (err) {
                               console.error("World generation failed:", err);
+                              setGenerationError(err instanceof Error ? err.message : "World generation failed");
                               setIsGeneratingWorld(false);
                             }
                           }}

@@ -15,7 +15,12 @@ function headers() {
 
 export interface PrepareUploadResponse {
   media_asset: {
-    id: string;
+    media_asset_id: string;
+    file_name: string;
+    kind: string;
+    extension: string;
+  };
+  upload_info: {
     upload_url: string;
     upload_method: string;
     required_headers: Record<string, string>;
@@ -89,12 +94,7 @@ export async function generateWorldFromImage(
   }
 
   const data = await res.json();
-  // The response contains an operation object with a name like "operations/{id}"
-  const operationName = data.name || data.id;
-  const operationId = operationName.includes("/")
-    ? operationName.split("/").pop()
-    : operationName;
-  return { operationId };
+  return { operationId: data.operation_id };
 }
 
 export async function generateWorldFromUrl(
@@ -130,11 +130,7 @@ export async function generateWorldFromUrl(
   }
 
   const data = await res.json();
-  const operationName = data.name || data.id;
-  const operationId = operationName.includes("/")
-    ? operationName.split("/").pop()
-    : operationName;
-  return { operationId };
+  return { operationId: data.operation_id };
 }
 
 export async function pollOperation(
@@ -162,6 +158,7 @@ export async function pollOperation(
         thumbnailUrl: data.response.assets?.thumbnail_url,
         panoramaUrl: data.response.assets?.imagery?.pano_url,
         caption: data.response.assets?.caption,
+        splatUrls: data.response.assets?.splats?.spz_urls,
       },
     };
   }
@@ -176,6 +173,11 @@ export interface MarbleWorldResponse {
   thumbnailUrl?: string;
   panoramaUrl?: string;
   caption?: string;
+  splatUrls?: {
+    "500k"?: string;
+    "100k"?: string;
+    full_res?: string;
+  };
 }
 
 export async function generateWorldFromImageFile(
@@ -188,18 +190,19 @@ export async function generateWorldFromImageFile(
 
   // Step 1: Prepare upload
   const prepared = await prepareMediaUpload(fileName, "image", ext);
+  console.log("Marble prepare_upload response:", JSON.stringify(prepared, null, 2));
 
   // Step 2: Upload file
   await uploadMediaFile(
-    prepared.media_asset.upload_url,
-    prepared.media_asset.upload_method,
-    prepared.media_asset.required_headers,
+    prepared.upload_info.upload_url,
+    prepared.upload_info.upload_method,
+    prepared.upload_info.required_headers,
     fileBuffer
   );
 
   // Step 3: Generate world
   return generateWorldFromImage(
-    prepared.media_asset.id,
+    prepared.media_asset.media_asset_id,
     displayName,
     textPrompt
   );

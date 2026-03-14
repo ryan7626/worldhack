@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateWorldFromUrl, pollOperation } from "@/lib/marble";
+import { readFile } from "fs/promises";
+import path from "path";
+import { generateWorldFromImageFile, generateWorldFromUrl, pollOperation } from "@/lib/marble";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,17 +14,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert relative URL to absolute for the Marble API
-    const host = request.headers.get("host") || "localhost:3000";
-    const protocol = host.includes("localhost") ? "http" : "https";
-    const absoluteUrl = photoUrl.startsWith("http")
-      ? photoUrl
-      : `${protocol}://${host}${photoUrl}`;
+    let operationId: string;
 
-    const { operationId } = await generateWorldFromUrl(
-      absoluteUrl,
-      displayName || "Memory World"
-    );
+    if (photoUrl.startsWith("http")) {
+      // External URL — pass directly to Marble
+      ({ operationId } = await generateWorldFromUrl(
+        photoUrl,
+        displayName || "Memory World"
+      ));
+    } else {
+      // Local file — upload directly to Marble via media asset
+      const filePath = path.join(process.cwd(), "public", photoUrl);
+      const fileBuffer = await readFile(filePath);
+      const fileName = path.basename(photoUrl);
+      ({ operationId } = await generateWorldFromImageFile(
+        fileBuffer,
+        fileName,
+        displayName || "Memory World"
+      ));
+    }
 
     // Poll for completion (with timeout for hackathon demo)
     const maxAttempts = 120; // 10 minutes max
@@ -41,6 +51,7 @@ export async function POST(request: NextRequest) {
             caption: result.world.caption,
             thumbnailUrl: result.world.thumbnailUrl,
             panoramaUrl: result.world.panoramaUrl,
+            splatUrl: result.world.splatUrls?.["500k"] || result.world.splatUrls?.full_res,
           });
         }
       } catch (pollError) {
