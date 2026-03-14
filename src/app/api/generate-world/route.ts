@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateWorldFromUrl, pollOperation } from "@/lib/marble";
+import { enhancePrompt } from "@/lib/prompt-enhancer";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
-    const { photoUrl, displayName, photoId } = await request.json();
+    const { photoUrl, displayName, photoId, metadata } = await request.json();
 
     if (!photoUrl) {
       return NextResponse.json(
@@ -13,9 +14,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate an enhanced text prompt from photo metadata
+    let textPrompt: string | undefined;
+    try {
+      textPrompt = await enhancePrompt({
+        dateTaken: metadata?.dateTaken,
+        latitude: metadata?.latitude,
+        longitude: metadata?.longitude,
+        description: displayName,
+        originalName: metadata?.originalName,
+      });
+      console.log("Enhanced prompt:", textPrompt);
+    } catch (e) {
+      console.warn("Prompt enhancement skipped:", e);
+    }
+
     const { operationId } = await generateWorldFromUrl(
       photoUrl,
-      displayName || "Memory World"
+      displayName || "Memory World",
+      textPrompt
     );
 
     // Initial record in worlds table
@@ -24,7 +41,7 @@ export async function POST(request: NextRequest) {
         .from("worlds")
         .insert([{
           display_name: displayName || "Memory World",
-          world_marble_url: "", // Pending
+          world_marble_url: "",
           status: "generating",
           operation_id: operationId,
           source_photo_id: photoId
@@ -33,8 +50,8 @@ export async function POST(request: NextRequest) {
       if (initialError) console.warn("Failed to create initial world record:", initialError);
     }
 
-    // Poll for completion (with timeout for hackathon demo)
-    const maxAttempts = 120; // 10 minutes max
+    // Poll for completion
+    const maxAttempts = 120;
     let attempts = 0;
 
     while (attempts < maxAttempts) {
@@ -46,7 +63,6 @@ export async function POST(request: NextRequest) {
         if (result.done && result.world) {
           const splatUrl = result.world.splatUrls?.full_res || result.world.splatUrls?.["500k"];
           
-          // Update Supabase record
           if (photoId) {
             await supabase
               .from("worlds")
@@ -56,7 +72,7 @@ export async function POST(request: NextRequest) {
                 thumbnail_url: result.world.thumbnailUrl,
                 panorama_url: result.world.panoramaUrl,
                 caption: result.world.caption,
-                asset_ids: result.world.splatUrls // Store the splat mapping
+                asset_ids: result.world.splatUrls
               })
               .eq("operation_id", operationId);
           }

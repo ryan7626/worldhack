@@ -232,7 +232,18 @@ export default function Home() {
                                   headers: { "Content-Type": "application/json" },
                                   body: JSON.stringify({
                                     photoUrl: photo.url,
+                                    photoId: photo.id,
                                     displayName: photo.description || photo.originalName,
+                                    metadata: {
+                                      dateTaken: photo.dateTaken,
+                                      latitude: photo.location?.latitude,
+                                      longitude: photo.location?.longitude,
+                                      cameraMake: photo.camera?.make,
+                                      cameraModel: photo.camera?.model,
+                                      width: photo.width,
+                                      height: photo.height,
+                                      originalName: photo.originalName,
+                                    },
                                   }),
                                 });
                                 const data = await res.json();

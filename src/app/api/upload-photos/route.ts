@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
         const exifData = await exifr.default.parse(buffer, {
           pick: [
             "DateTimeOriginal", "CreateDate", "ModifyDate", 
-            "GPSLatitude", "GPSLongitude", 
+            "GPSLatitude", "GPSLongitude",
+            "GPSLatitudeRef", "GPSLongitudeRef",
             "Make", "Model"
           ],
         });
@@ -72,10 +73,12 @@ export async function POST(request: NextRequest) {
           }
 
           if (exifData.GPSLatitude != null && exifData.GPSLongitude != null) {
-            location = { 
-              latitude: toDecimal(exifData.GPSLatitude), 
-              longitude: toDecimal(exifData.GPSLongitude) 
-            };
+            let lat = toDecimal(exifData.GPSLatitude);
+            let lon = toDecimal(exifData.GPSLongitude);
+            // Apply hemisphere sign: S = negative lat, W = negative lon
+            if (exifData.GPSLatitudeRef === "S") lat = -lat;
+            if (exifData.GPSLongitudeRef === "W") lon = -lon;
+            location = { latitude: lat, longitude: lon };
           }
         }
       } catch (e) {
