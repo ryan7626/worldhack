@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import path from "path";
-import { generateWorldFromImageFile, generateWorldFromUrl, pollOperation } from "@/lib/marble";
+import { generateWorldFromUrl, pollOperation } from "@/lib/marble";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
-    const { photoUrl, displayName } = await request.json();
+    const { photoUrl, displayName, photoId } = await request.json();
 
     if (!photoUrl) {
       return NextResponse.json(
@@ -14,24 +13,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let operationId: string;
+    const { operationId } = await generateWorldFromUrl(
+      photoUrl,
+      displayName || "Memory World"
+    );
 
-    if (photoUrl.startsWith("http")) {
-      // External URL — pass directly to Marble
-      ({ operationId } = await generateWorldFromUrl(
-        photoUrl,
-        displayName || "Memory World"
-      ));
-    } else {
-      // Local file — upload directly to Marble via media asset
-      const filePath = path.join(process.cwd(), "public", photoUrl);
-      const fileBuffer = await readFile(filePath);
-      const fileName = path.basename(photoUrl);
-      ({ operationId } = await generateWorldFromImageFile(
-        fileBuffer,
-        fileName,
-        displayName || "Memory World"
-      ));
+    // Initial record in worlds table
+    if (photoId) {
+      const { error: initialError } = await supabase
+        .from("worlds")
+        .insert([{
+          display_name: displayName || "Memory World",
+          world_marble_url: "", // Pending
+          status: "generating",
+          operation_id: operationId,
+          source_photo_id: photoId
+        }]);
+      
+      if (initialError) console.warn("Failed to create initial world record:", initialError);
     }
 
     // Poll for completion (with timeout for hackathon demo)
@@ -39,19 +38,36 @@ export async function POST(request: NextRequest) {
     let attempts = 0;
 
     while (attempts < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 5000)); // Poll every 5 seconds
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       attempts++;
 
       try {
         const result = await pollOperation(operationId);
         if (result.done && result.world) {
+          const splatUrl = result.world.splatUrls?.full_res || result.world.splatUrls?.["500k"];
+          
+          // Update Supabase record
+          if (photoId) {
+            await supabase
+              .from("worlds")
+              .update({
+                world_marble_url: result.world.worldMarbleUrl,
+                status: "completed",
+                thumbnail_url: result.world.thumbnailUrl,
+                panorama_url: result.world.panoramaUrl,
+                caption: result.world.caption,
+                asset_ids: result.world.splatUrls // Store the splat mapping
+              })
+              .eq("operation_id", operationId);
+          }
+
           return NextResponse.json({
             worldUrl: result.world.worldMarbleUrl,
             worldId: result.world.id,
             caption: result.world.caption,
             thumbnailUrl: result.world.thumbnailUrl,
             panoramaUrl: result.world.panoramaUrl,
-            splatUrl: result.world.splatUrls?.full_res || result.world.splatUrls?.["500k"],
+            splatUrl: splatUrl,
           });
         }
       } catch (pollError) {
@@ -59,19 +75,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Return the operation ID if we timeout
     return NextResponse.json({
       operationId,
       status: "still_generating",
-      message: "World is still being generated. Use the operation ID to check status.",
     });
   } catch (error) {
     console.error("World generation error:", error);
     return NextResponse.json(
-      {
-        error: "World generation failed",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
+      { error: "World generation failed" },
       { status: 500 }
     );
   }

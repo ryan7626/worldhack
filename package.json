@@ -27,6 +27,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@sparkjsdev/spark": "^0.1.10",
+    "@supabase/supabase-js": "^2.99.1",
     "ai": "^6.0.116",
     "dotenv": "^17.3.1",
     "exifr": "^7.1.3",

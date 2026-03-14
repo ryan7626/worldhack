@@ -7,10 +7,18 @@ export interface PhotoMetadata {
   tags: string[];
   width?: number;
   height?: number;
-  location?: string;
+  location?: {
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  camera?: {
+    make?: string;
+    model?: string;
+  };
   uploadedAt: string;
-  path: string;
-  url: string;
+  path?: string; // Local path (legacy)
+  url: string;   // Public Supabase Storage URL
 }
 
 export interface PhotoStore {

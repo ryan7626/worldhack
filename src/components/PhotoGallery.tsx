@@ -13,24 +13,31 @@ export function PhotoGallery({ photos, highlightedIds = [] }: PhotoGalleryProps)
 
   return (
     <div className="space-y-8 mt-12">
-      <h3 className="text-xs uppercase tracking-widest text-muted border-b border-slate-100 pb-4">
-        Archive ({photos.length})
-      </h3>
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <h3 className="text-xs uppercase tracking-widest text-muted font-bold">
+          Cloud Archive ({photos.length})
+        </h3>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-[10px] uppercase tracking-widest text-muted font-bold">Live Stream</span>
+        </div>
+      </div>
+      
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
         {photos.map((photo) => {
           const isHighlighted = highlightedIds.includes(photo.id);
           const date = photo.dateTaken
             ? new Date(photo.dateTaken).toLocaleDateString("en-US", {
                 year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
+                month: "short",
+                day: "numeric",
               })
-            : "No date recorded";
+            : "Unknown Date";
 
           return (
             <div
               key={photo.id}
-              className={`group flex flex-col gap-3 transition-opacity ${
+              className={`group flex flex-col gap-3 transition-all duration-500 ${
                 isHighlighted ? "opacity-100 scale-[1.02]" : "hover:opacity-100"
               }`}
             >
@@ -48,22 +55,46 @@ export function PhotoGallery({ photos, highlightedIds = [] }: PhotoGalleryProps)
                   }`}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
+                
+                {/* Metadata Overlay on Hover */}
+                <div className="absolute inset-x-0 bottom-0 bg-white/90 backdrop-blur-md p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 border-t border-slate-100">
+                  <div className="space-y-2">
+                    {photo.camera?.model && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] text-muted uppercase tracking-tighter font-bold">Device</span>
+                        <span className="text-[9px] text-main font-bold truncate max-w-[100px]">{photo.camera.model}</span>
+                      </div>
+                    )}
+                    {photo.width && photo.height && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] text-muted uppercase tracking-tighter font-bold">Resolution</span>
+                        <span className="text-[9px] text-main font-bold">{photo.width} × {photo.height}</span>
+                      </div>
+                    )}
+                    {photo.location?.latitude && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] text-muted uppercase tracking-tighter font-bold">Coordinates</span>
+                        <span className="text-[9px] text-main font-bold truncate max-w-[100px]">
+                          {photo.location.latitude.toFixed(3)}, {photo.location.longitude?.toFixed(3)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
               
               <div className="px-1 flex justify-between items-baseline gap-4">
-                <p className="text-xs text-main font-bold truncate uppercase tracking-widest">
+                <p className="text-[10px] text-main font-bold truncate uppercase tracking-widest flex-1">
                   {photo.originalName.replace(/\.[^/.]+$/, "")}
                 </p>
-                <span className="text-[10px] text-muted tracking-widest font-bold">
+                <span className="text-[9px] text-muted tracking-widest font-bold whitespace-nowrap">
                   {date}
                 </span>
               </div>
             </div>
-
           );
         })}
       </div>
     </div>
   );
 }
-
