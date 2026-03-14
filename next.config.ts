@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withWebSpatial from "@webspatial/next-plugin";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@livekit/agents", "@livekit/agents-plugin-openai"],
@@ -16,4 +17,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withWebSpatial()(nextConfig);

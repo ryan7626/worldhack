@@ -1,0 +1,30 @@
+{
+  "name": "Memory Reliver",
+  "short_name": "Memory Reliver",
+  "description": "Relive your memories as explorable 3D worlds — powered by voice AI",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fcfaf7",
+  "theme_color": "#e67e22",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "xr_main_scene": {
+    "default_size": {
+      "width": 1200,
+      "height": 900
+    }
+  }
+}

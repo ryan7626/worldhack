@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { VoiceInterface } from "@/components/VoiceInterface";
-import { WorldViewer } from "@/components/WorldViewer";
+import { WorldViewer, applySceneEditGlobal } from "@/components/WorldViewer";
+import { SceneEditBar } from "@/components/SceneEditBar";
 import { NetworkBackground } from "@/components/NetworkBackground";
 import type { PhotoMetadata } from "@/lib/types";
 
@@ -50,7 +51,7 @@ export default function Home() {
       <NetworkBackground />
       
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent spatial-header __enableXr__">
         <div className="max-w-screen-2xl mx-auto px-6 py-6 flex items-center justify-between">
           <div>
             <h1 className="text-sm font-bold tracking-widest text-primary uppercase">
@@ -96,7 +97,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-white/50 backdrop-blur-sm border border-slate-100 p-12">
+                  <div className="bg-white/50 backdrop-blur-sm border border-slate-100 p-12 spatial-panel spatial-elevated __enableXr__">
               <PhotoUploader onPhotosUploaded={handlePhotosUploaded} />
             </div>
 
@@ -129,7 +130,7 @@ export default function Home() {
               {/* Left Column: Voice Interface + Photos */}
               <div className="space-y-12 pr-4 xl:border-r border-slate-100">
                 {/* Voice Card */}
-                <div className="bg-white/50 backdrop-blur-sm border border-slate-100 p-8">
+                          <div className="bg-white/50 backdrop-blur-sm border border-slate-100 p-8 spatial-panel spatial-voice __enableXr__">
                   <VoiceInterface onWorldGenerated={handleWorldGenerated} />
                 </div>
 
@@ -211,8 +212,8 @@ export default function Home() {
                   )}
 
                   {/* Manual world generation for demo */}
-                  {photos.length > 0 && !isGeneratingWorld && (
-                    <div className="mt-12 bg-white/50 backdrop-blur-sm p-8 border border-slate-100">
+                              {photos.length > 0 && !isGeneratingWorld && (
+                    <div className="mt-12 bg-white/50 backdrop-blur-sm p-8 border border-slate-100 spatial-panel-thin spatial-elevated __enableXr__">
                       <h3 className="text-xs uppercase tracking-widest text-primary mb-8 text-center font-bold">
                         Quick Generation Demo
                       </h3>
@@ -280,7 +281,7 @@ export default function Home() {
 
       {/* Fullscreen Lightbox */}
       {showLightbox && (worldUrl || splatUrl) && (
-        <div className="fixed inset-0 z-100 bg-(--bg-main)">
+        <div className="fixed inset-0 z-100 bg-(--bg-main) spatial-lightbox spatial-world __enableXr__">
           {/* Floating Controls */}
           <div className="absolute top-8 right-8 z-110 flex items-center gap-4 group/controls">
             {worldCaption && (
@@ -328,7 +329,7 @@ export default function Home() {
 
 
           {/* Fullscreen world viewer */}
-          <div className="w-full h-full">
+          <div className="w-full h-full relative">
             <WorldViewer
               worldUrl={worldUrl}
               splatUrl={splatUrl}
@@ -336,6 +337,9 @@ export default function Home() {
               caption={worldCaption}
               isGenerating={false}
               fullscreen
+            />
+            <SceneEditBar
+              onSceneEdit={applySceneEditGlobal}
             />
           </div>
         </div>

@@ -14,6 +14,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^3.0.41
         version: 3.0.41(zod@4.3.6)
+      '@google/model-viewer':
+        specifier: ^4.2.0
+        version: 4.2.0(three@0.183.2)
       '@livekit/agents':
         specifier: ^1.0.50
         version: 1.0.50(@livekit/rtc-node@0.13.24)(zod@4.3.6)
@@ -44,6 +47,12 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.99.1
         version: 2.99.1
+      '@webspatial/core-sdk':
+        specifier: ^1.2.1
+        version: 1.2.1
+      '@webspatial/react-sdk':
+        specifier: ^1.2.1
+        version: 1.2.1(@webspatial/core-sdk@1.2.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ai:
         specifier: ^6.0.116
         version: 6.0.116(zod@4.3.6)
@@ -108,6 +117,9 @@ importers:
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
+      '@webspatial/next-plugin':
+        specifier: ^0.1.10
+        version: 0.1.10
       eslint:
         specifier: ^10.0.3
         version: 10.0.3(jiti@2.6.1)
@@ -412,6 +424,12 @@ packages:
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
+  '@google/model-viewer@4.2.0':
+    resolution: {integrity: sha512-RjpAI5cLs9CdvPcMRsOs8Bea/lNmGTTyaPyl16o9Fv6Qn8VSpgBMmXFr/11yb0hTrsojp2dOACEcY77R8hVUVA==}
+    engines: {node: '>=6.0.0'}
+    peerDependencies:
+      three: ^0.182.0
+
   '@hono/node-server@1.19.11':
     resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
     engines: {node: '>=18.14.1'}
@@ -590,6 +608,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lit-labs/ssr-dom-shim@1.5.1':
+    resolution: {integrity: sha512-Aou5UdlSpr5whQe8AA/bZG0jMj96CoJIWbGfZ91qieWu5AWUMKw8VR/pAkQkJYvBNhmCcWnZlyyk5oze8JIqYA==}
+
+  '@lit/reactive-element@2.1.2':
+    resolution: {integrity: sha512-pbCDiVMnne1lYUIaYNN5wrwQXDtHaYtg7YEFPeW+hws6U47WeFvISGUWekPGKWOP1ygrs0ef0o1VJMk1exos5A==}
 
   '@livekit/agents-plugin-openai@1.0.50':
     resolution: {integrity: sha512-7esqiMajgKcnixgOH8L2Bnwr/9AQllAXhXfsw0C2r6AwN+/lLfxt2IZHDF0Uewy6gFjEYG7AWyjie0gGLE5O+w==}
@@ -1174,6 +1198,9 @@ packages:
   '@types/three@0.183.1':
     resolution: {integrity: sha512-f2Pu5Hrepfgavttdye3PsH5RWyY/AvdZQwIVhrc4uNtvF7nOWJacQKcoVJn0S4f0yYbmAE6AR+ve7xDcuYtMGw==}
 
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
   '@types/uuid@11.0.0':
     resolution: {integrity: sha512-HVyk8nj2m+jcFRNazzqyVKiZezyhDKrGUA3jlEcg/nZ6Ms+qHwocba1Y/AaVaznJTAM9xpdFSh+ptbNrhOGvZA==}
     deprecated: This is a stub types definition. uuid provides its own type definitions, so you do not need this installed.
@@ -1198,6 +1225,27 @@ packages:
 
   '@webgpu/types@0.1.69':
     resolution: {integrity: sha512-RPmm6kgRbI8e98zSD3RVACvnuktIja5+yLgDAkTmxLr90BEwdTXRQWNLF3ETTTyH/8mKhznZuN5AveXYFEsMGQ==}
+
+  '@webspatial/core-sdk@1.2.1':
+    resolution: {integrity: sha512-p0An+hw8giZLTWBn+5QF0xlDgU/i4MpFUhZf5uK1oGnWud7a3lbVFgJBZRDTYgqyPfi9EwklYcRUQWmM2Iq7qg==}
+
+  '@webspatial/next-plugin@0.1.10':
+    resolution: {integrity: sha512-nWRB//sjx6LSvTZ5hl8JhsylvoUUo5xLwlskWgOfiWAG12Aj2naD05mUcFQ2WfKzpoFsPA9PTFqPS8aOlufR5g==}
+
+  '@webspatial/react-sdk@1.2.1':
+    resolution: {integrity: sha512-kQidyMlSyDfvqm583mMPu+dGGK9G/PxxPlURQz81stsQHg/4dh9HrgdolexJ29eQcybcrOUINy8HWP2k0HqA7Q==}
+    peerDependencies:
+      '@webspatial/core-sdk': 1.2.1
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  '@webspatial/shared@0.2.0':
+    resolution: {integrity: sha512-+1QQ96PHuLvTOAqteJ+5Y2ta9226vlfs//0gIg+5V9rmNCFKF2K+RqgiWjBbT4wC5d1EgE52UPzpL4rYavyhsA==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -1871,6 +1919,15 @@ packages:
   lightningcss@1.31.1:
     resolution: {integrity: sha512-l51N2r93WmGUye3WuFoN5k10zyvrVs0qfKBhyC5ogUQ6Ew6JUSswh78mbSO+IU3nTWsyOArqPCcShdQSadghBQ==}
     engines: {node: '>= 12.0.0'}
+
+  lit-element@4.2.2:
+    resolution: {integrity: sha512-aFKhNToWxoyhkNDmWZwEva2SlQia+jfG0fjIWV//YeTaWrVnOxD89dPKfigCUspXFmjzOEUQpOkejH5Ly6sG0w==}
+
+  lit-html@3.3.2:
+    resolution: {integrity: sha512-Qy9hU88zcmaxBXcc10ZpdK7cOLXvXpRoBxERdtqV9QOrfpMZZ6pSYP91LhpPtap3sFMUiL7Tw2RImbe0Al2/kw==}
+
+  lit@3.3.2:
+    resolution: {integrity: sha512-NF9zbsP79l4ao2SNrH3NkfmFgN/hBYSQo90saIVI1o5GpjAdCPVstVzO1MrLOakHoEhYkrtRjPK6Ob521aoYWQ==}
 
   livekit-client@2.17.3:
     resolution: {integrity: sha512-htwsAL/BMylY/zwdcT/z00U789csbi9DldSW7DO+5tz7Q15pwu++E1X+ZdtZDfkmlysfQLLibdcqlyg9FY7veQ==}
@@ -2797,6 +2854,12 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
+  '@google/model-viewer@4.2.0(three@0.183.2)':
+    dependencies:
+      '@monogrid/gainmap-js': 3.4.0(three@0.183.2)
+      lit: 3.3.2
+      three: 0.183.2
+
   '@hono/node-server@1.19.11(hono@4.12.8)':
     dependencies:
       hono: 4.12.8
@@ -2930,6 +2993,12 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@lit-labs/ssr-dom-shim@1.5.1': {}
+
+  '@lit/reactive-element@2.1.2':
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.5.1
 
   '@livekit/agents-plugin-openai@1.0.50(@livekit/agents@1.0.50(@livekit/rtc-node@0.13.24)(zod@4.3.6))(@livekit/rtc-node@0.13.24)(zod@4.3.6)':
     dependencies:
@@ -3559,6 +3628,8 @@ snapshots:
       fflate: 0.8.2
       meshoptimizer: 1.0.1
 
+  '@types/trusted-types@2.0.7': {}
+
   '@types/uuid@11.0.0':
     dependencies:
       uuid: 13.0.0
@@ -3579,6 +3650,21 @@ snapshots:
   '@vercel/oidc@3.1.0': {}
 
   '@webgpu/types@0.1.69': {}
+
+  '@webspatial/core-sdk@1.2.1': {}
+
+  '@webspatial/next-plugin@0.1.10':
+    dependencies:
+      '@webspatial/shared': 0.2.0
+
+  '@webspatial/react-sdk@1.2.1(@webspatial/core-sdk@1.2.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@webspatial/core-sdk': 1.2.1
+    optionalDependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+
+  '@webspatial/shared@0.2.0': {}
 
   abort-controller@3.0.0:
     dependencies:
@@ -4244,6 +4330,22 @@ snapshots:
       lightningcss-linux-x64-musl: 1.31.1
       lightningcss-win32-arm64-msvc: 1.31.1
       lightningcss-win32-x64-msvc: 1.31.1
+
+  lit-element@4.2.2:
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.5.1
+      '@lit/reactive-element': 2.1.2
+      lit-html: 3.3.2
+
+  lit-html@3.3.2:
+    dependencies:
+      '@types/trusted-types': 2.0.7
+
+  lit@3.3.2:
+    dependencies:
+      '@lit/reactive-element': 2.1.2
+      lit-element: 4.2.2
+      lit-html: 3.3.2
 
   livekit-client@2.17.3(@types/dom-mediacapture-record@1.0.22):
     dependencies:

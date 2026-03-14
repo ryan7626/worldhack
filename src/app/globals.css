@@ -78,3 +78,57 @@
 .text-muted {
   color: var(--text-muted);
 }
+
+/* ===== WebSpatial / XR Spatial Styles ===== */
+html.is-spatial {
+  background-color: transparent;
+  --xr-background-material: translucent;
+}
+
+html.is-spatial body {
+  background-color: transparent;
+}
+
+/* Spatial panels — glass material with depth */
+html.is-spatial .spatial-panel {
+  --xr-background-material: translucent;
+  border-radius: 20px;
+}
+
+html.is-spatial .spatial-panel-thin {
+  --xr-background-material: thin;
+  border-radius: 16px;
+}
+
+html.is-spatial .spatial-elevated {
+  --xr-back: 30;
+}
+
+html.is-spatial .spatial-elevated-high {
+  --xr-back: 60;
+}
+
+/* Voice orb floats forward in space */
+html.is-spatial .spatial-voice {
+  --xr-back: 80;
+  --xr-background-material: thick;
+  border-radius: 50%;
+}
+
+/* World viewer takes priority depth */
+html.is-spatial .spatial-world {
+  --xr-back: 100;
+  --xr-background-material: transparent;
+}
+
+/* Lightbox becomes full spatial scene */
+html.is-spatial .spatial-lightbox {
+  --xr-background-material: transparent;
+}
+
+/* Header floats above content */
+html.is-spatial .spatial-header {
+  --xr-back: 20;
+  --xr-background-material: regular;
+  border-radius: 12px;
+}

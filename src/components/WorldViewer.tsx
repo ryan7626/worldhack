@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { SceneParams } from "@/app/api/scene-edit/route";
+
+export interface WorldViewerHandle {
+  applySceneEdit: (params: SceneParams) => void;
+}
 
 interface WorldViewerProps {
   worldUrl?: string;
@@ -9,6 +14,13 @@ interface WorldViewerProps {
   caption?: string;
   isGenerating?: boolean;
   fullscreen?: boolean;
+}
+
+// Global scene edit function — set by the active WorldViewer instance
+export function applySceneEditGlobal(params: SceneParams) {
+  const fn = (window as any).__applySceneEdit__;
+  if (fn) fn(params);
+  else console.error("No active WorldViewer to edit");
 }
 
 export function WorldViewer({
@@ -22,24 +34,27 @@ export function WorldViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const [splatLoaded, setSplatLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const rendererInitialized = useRef(false);
 
   useEffect(() => {
-    if (!splatUrl || !containerRef.current || rendererInitialized.current) return;
+    if (!splatUrl || !containerRef.current) return;
 
-    let cleanup: (() => void) | undefined;
+    let cancelled = false;
 
     async function initSplatRenderer() {
       try {
         const THREE = await import("three");
         const { SplatMesh } = await import("@sparkjsdev/spark");
         const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
+
+        // If cleanup ran while we were importing, abort
+        if (cancelled) return;
+
         const container = containerRef.current!;
         const width = container.clientWidth;
         const height = container.clientHeight;
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xfcfaf7); // Warm off-white background
+        scene.background = new THREE.Color(0xfcfaf7);
 
         const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
         camera.position.set(0, 0, 0);
@@ -62,7 +77,6 @@ export function WorldViewer({
         controls.target.set(0, 0, -1);
         controls.update();
 
-        // Place splat at origin with correct orientation
         const splats = new SplatMesh({
           url: splatUrl,
           onLoad: () => {
@@ -78,7 +92,58 @@ export function WorldViewer({
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
 
-        rendererInitialized.current = true;
+        // Store original values for reset
+        const originalBg = scene.background.clone();
+        const originalLightColor = ambientLight.color.clone();
+        const originalLightIntensity = ambientLight.intensity;
+
+        // Register global scene edit function with direct closure over live objects
+        (window as any).__applySceneEdit__ = (params: SceneParams) => {
+          console.log("Applying scene edit (global):", params);
+
+          // Check if this is a reset
+          const isReset = params.description?.toLowerCase().includes("reset") ||
+                          params.description?.toLowerCase().includes("default");
+
+          if (isReset) {
+            scene.background.copy(originalBg);
+            ambientLight.color.copy(originalLightColor);
+            ambientLight.intensity = originalLightIntensity;
+            splats.recolor = undefined;
+            splats.opacity = 1.0;
+            scene.fog = null;
+            console.log("Scene reset to original");
+            return;
+          }
+
+          const [br, bg, bb] = params.backgroundColor;
+          scene.background.setRGB(br / 255, bg / 255, bb / 255);
+
+          const [lr, lg, lb] = params.ambientLightColor;
+          ambientLight.color.setRGB(lr / 255, lg / 255, lb / 255);
+          ambientLight.intensity = params.ambientLightIntensity;
+
+          if (params.splatTint) {
+            const [sr, sg, sb] = params.splatTint;
+            splats.recolor = new THREE.Color(sr / 255, sg / 255, sb / 255);
+          } else {
+            splats.recolor = undefined;
+          }
+
+          splats.opacity = params.splatOpacity;
+
+          if (params.fogColor && params.fogDensity > 0) {
+            const [fr, fg, fb] = params.fogColor;
+            scene.fog = new THREE.FogExp2(
+              new THREE.Color(fr / 255, fg / 255, fb / 255).getHex(),
+              params.fogDensity
+            );
+          } else {
+            scene.fog = null;
+          }
+
+          console.log("Scene edit applied");
+        };
 
         renderer.setAnimationLoop(() => {
           controls.update();
@@ -93,17 +158,6 @@ export function WorldViewer({
           renderer.setSize(w, h);
         };
         window.addEventListener("resize", handleResize);
-
-        cleanup = () => {
-          renderer.setAnimationLoop(null);
-          window.removeEventListener("resize", handleResize);
-          controls.dispose();
-          splats.dispose();
-          renderer.dispose();
-          if (container.contains(renderer.domElement)) {
-            container.removeChild(renderer.domElement);
-          }
-        };
       } catch (err) {
         console.error("SparkJS renderer failed:", err);
         setLoadError(err instanceof Error ? err.message : "Failed to load 3D world");
@@ -112,7 +166,16 @@ export function WorldViewer({
 
     initSplatRenderer();
 
-    return () => cleanup?.();
+    return () => {
+      cancelled = true;
+      // Clean up any renderer that was created
+      const container = containerRef.current;
+      if (container) {
+        const canvas = container.querySelector("canvas");
+        if (canvas) canvas.remove();
+      }
+      (window as any).__applySceneEdit__ = null;
+    };
   }, [splatUrl]);
 
   if (isGenerating) {
@@ -140,16 +203,10 @@ export function WorldViewer({
     );
   }
 
-  const shortCaption = caption
-    ? caption.split(". ").slice(0, 2).join(". ") + "."
-    : undefined;
-
   const sizeClass = fullscreen ? "w-full h-full" : "aspect-video w-full";
 
   return (
     <div className={`relative border border-slate-100 bg-white group ${fullscreen ? "w-full h-full border-none" : ""}`}>
-
-
       {/* 3D splat renderer container */}
       <div ref={containerRef} className={sizeClass}>
         {/* Show thumbnail while splat loads */}
