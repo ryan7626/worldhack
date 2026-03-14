@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "agent:dev": "node --import tsx agent/index.ts dev",
-    "agent:start": "node --import tsx agent/index.ts start"
+    "agent:start": "node --import tsx agent/index.ts start",
+    "mcp:start": "node --import tsx mcp-server/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "@livekit/agents-plugin-openai": "^1.0.50",
     "@livekit/agents-plugin-silero": "^1.0.50",
     "@livekit/components-react": "^2.9.20",
+    "@livekit/components-styles": "^1.2.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",

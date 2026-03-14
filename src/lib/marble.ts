@@ -48,7 +48,7 @@ export async function uploadMediaFile(
   const res = await fetch(uploadUrl, {
     method: uploadMethod,
     headers: requiredHeaders,
-    body: fileBuffer,
+    body: new Uint8Array(fileBuffer),
   });
   if (!res.ok) {
     const text = await res.text();
