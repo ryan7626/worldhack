@@ -34,17 +34,6 @@ export function WorldViewer({
         const THREE = await import("three");
         const { SplatMesh } = await import("@sparkjsdev/spark");
         const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
-        const {
-          EffectComposer,
-          EffectPass,
-          RenderPass,
-          SMAAEffect,
-          SMAAPreset,
-          BloomEffect,
-          ToneMappingEffect,
-          ToneMappingMode,
-        } = await import("postprocessing");
-
         const container = containerRef.current!;
         const width = container.clientWidth;
         const height = container.clientHeight;
@@ -57,29 +46,11 @@ export function WorldViewer({
 
         const renderer = new THREE.WebGLRenderer({
           powerPreference: "high-performance",
+          antialias: true,
         });
         renderer.setSize(width, height);
         renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.1;
         container.appendChild(renderer.domElement);
-
-        // Post-processing: SMAA anti-aliasing + subtle bloom + tone mapping
-        const composer = new EffectComposer(renderer);
-        composer.addPass(new RenderPass(scene, camera));
-        composer.addPass(
-          new EffectPass(
-            camera,
-            new SMAAEffect({ preset: SMAAPreset.ULTRA }),
-            new BloomEffect({
-              intensity: 0.15,
-              luminanceThreshold: 0.8,
-              luminanceSmoothing: 0.3,
-              mipmapBlur: true,
-            }),
-            new ToneMappingEffect({ mode: ToneMappingMode.AGX }),
-          )
-        );
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -108,7 +79,7 @@ export function WorldViewer({
 
         renderer.setAnimationLoop(() => {
           controls.update();
-          composer.render();
+          renderer.render(scene, camera);
         });
 
         const handleResize = () => {
@@ -117,7 +88,6 @@ export function WorldViewer({
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
           renderer.setSize(w, h);
-          composer.setSize(w, h);
         };
         window.addEventListener("resize", handleResize);
 
@@ -126,7 +96,6 @@ export function WorldViewer({
           window.removeEventListener("resize", handleResize);
           controls.dispose();
           splats.dispose();
-          composer.dispose();
           renderer.dispose();
           if (container.contains(renderer.domElement)) {
             container.removeChild(renderer.domElement);
