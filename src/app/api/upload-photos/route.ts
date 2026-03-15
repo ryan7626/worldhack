@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import sharp from "sharp";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { PhotoMetadata } from "@/lib/types";
 import path from "path";
 
@@ -17,6 +17,13 @@ function toDecimal(dms: number | number[]): number {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY to .env.local" },
+      { status: 503 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const files = formData.getAll("photos") as File[];

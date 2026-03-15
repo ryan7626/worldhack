@@ -9,13 +9,11 @@ import { SceneEditBar } from "@/components/SceneEditBar";
 import { NetworkBackground } from "@/components/NetworkBackground";
 import type { PhotoMetadata } from "@/lib/types";
 
-type AppView = "upload" | "main";
-
 export default function Home() {
   const [photos, setPhotos] = useState<PhotoMetadata[]>([]);
-  const [view, setView] = useState<AppView>("upload");
   const [worldUrl, setWorldUrl] = useState<string | undefined>();
   const [splatUrl, setSplatUrl] = useState<string | undefined>();
+  const [splatUrls, setSplatUrls] = useState<{ "100k"?: string; "500k"?: string; full_res?: string } | undefined>();
   const [worldCaption, setWorldCaption] = useState<string | undefined>();
   const [worldThumbnail, setWorldThumbnail] = useState<string | undefined>();
   const [isGeneratingWorld, setIsGeneratingWorld] = useState(false);
@@ -39,9 +37,10 @@ export default function Home() {
     setPhotos((prev) => [...prev, ...newPhotos]);
   }, []);
 
-  const handleWorldGenerated = useCallback((url: string, splat?: string) => {
+  const handleWorldGenerated = useCallback((url: string, splat?: string, allSplatUrls?: { "100k"?: string; "500k"?: string; full_res?: string }) => {
     setWorldUrl(url);
     if (splat) setSplatUrl(splat);
+    if (allSplatUrls) setSplatUrls(allSplatUrls);
     setIsGeneratingWorld(false);
     setShowLightbox(true);
   }, []);
@@ -55,85 +54,17 @@ export default function Home() {
         <div className="max-w-screen-2xl mx-auto px-6 py-6 flex items-center justify-between">
           <div>
             <h1 className="text-sm font-bold tracking-widest text-primary uppercase">
-              Memory Reliver
+              SceneForge
             </h1>
           </div>
-
-          <nav className="flex items-center gap-6">
-            <button
-              onClick={() => setView("upload")}
-              className={`text-xs tracking-widest uppercase transition-colors font-bold ${
-                view === "upload"
-                  ? "text-primary"
-                  : "text-muted hover:text-primary"
-              }`}
-            >
-              Add Photos
-            </button>
-            <button
-              onClick={() => setView("main")}
-              className={`text-xs tracking-widest uppercase transition-colors font-bold ${
-                view === "main"
-                  ? "text-primary"
-                  : "text-muted hover:text-primary"
-              }`}
-            >
-              Explore
-            </button>
-          </nav>
         </div>
       </header>
 
       <div className="pt-40 pb-20 px-6">
-        {view === "upload" ? (
-          /* Upload View */
-          <div className="max-w-4xl mx-auto space-y-16">
-            <div className="text-center space-y-6">
-              <h2 className="text-5xl md:text-6xl font-bold tracking-tight text-main">
-                Gather your memories.
-              </h2>
-              <p className="text-xl text-muted max-w-2xl mx-auto font-light">
-                Add photos from your life. We&apos;ll help you step back into them whenever you like.
-              </p>
-            </div>
-
-                  <div className="bg-white/50 backdrop-blur-sm border border-slate-100 p-12 spatial-panel spatial-elevated __enableXr__">
-              <PhotoUploader onPhotosUploaded={handlePhotosUploaded} />
-            </div>
-
-            {photos.length > 0 && (
-              <div className="space-y-12">
-                <PhotoGallery photos={photos} />
-                
-                <div className="text-center pt-12">
-                  <button
-                    onClick={() => setView("main")}
-                    className="px-12 py-5 bg-primary text-white text-xs tracking-widest uppercase font-bold hover:bg-primary-dark transition-all hover:shadow-lg hover:shadow-primary/20"
-                  >
-                    Start Exploring
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {/* Minimal footer */}
-            <div className="w-full text-center pt-32 pb-8">
-               <p className="text-xs tracking-widest uppercase text-muted font-bold">
-                 © 2026 — SYSTEM ALIVE
-               </p>
-            </div>
-          </div>
-        ) : (
-          /* Main Experience View */
           <div className="max-w-screen-2xl mx-auto">
             <div className="grid grid-cols-1 xl:grid-cols-[450px_1fr] gap-12 min-h-[75vh]">
-              {/* Left Column: Voice Interface + Photos */}
+              {/* Left Column: Upload + Photos */}
               <div className="space-y-12 pr-4 xl:border-r border-slate-100">
-                {/* Voice Card */}
-                          <div className="bg-white/50 backdrop-blur-sm border border-slate-100 p-8 spatial-panel spatial-voice __enableXr__">
-                  <VoiceInterface onWorldGenerated={handleWorldGenerated} />
-                </div>
-
                 {/* Suggestions Card */}
                 <div>
                   <h3 className="text-xs uppercase tracking-widest text-muted mb-6 font-bold">
@@ -156,7 +87,15 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Mini Gallery */}
+                {/* Photo Uploader */}
+                <div>
+                  <h3 className="text-xs uppercase tracking-widest text-muted mb-4 font-bold">
+                    Add Photos
+                  </h3>
+                  <PhotoUploader onPhotosUploaded={handlePhotosUploaded} />
+                </div>
+
+                {/* Photo Gallery */}
                 {photos.length > 0 && (
                   <div>
                     <PhotoGallery photos={photos} highlightedIds={highlightedPhotoIds} />
@@ -251,7 +190,7 @@ export default function Home() {
                                   setGenerationError(data.details || data.error);
                                   setIsGeneratingWorld(false);
                                 } else if (data.worldUrl) {
-                                  handleWorldGenerated(data.worldUrl, data.splatUrl);
+                                  handleWorldGenerated(data.worldUrl, data.splatUrl, data.splatUrls);
                                   if (data.caption) setWorldCaption(data.caption);
                                   if (data.thumbnailUrl) setWorldThumbnail(data.thumbnailUrl);
                                 } else {
@@ -283,12 +222,14 @@ export default function Home() {
             {/* Minimal footer */}
             <div className="w-full text-center pt-24 pb-8">
                <p className="text-xs tracking-widest uppercase text-muted font-bold">
-                 © 2026 — SYSTEM ALIVE
+                 © 2026 — SceneForge
                </p>
             </div>
           </div>
-        )}
       </div>
+
+      {/* Floating Voice Assistant Orb */}
+      <VoiceInterface onWorldGenerated={handleWorldGenerated} />
 
       {/* Fullscreen Lightbox */}
       {showLightbox && (worldUrl || splatUrl) && (
@@ -344,6 +285,7 @@ export default function Home() {
             <WorldViewer
               worldUrl={worldUrl}
               splatUrl={splatUrl}
+              splatUrls={splatUrls}
               thumbnailUrl={worldThumbnail}
               caption={worldCaption}
               isGenerating={false}

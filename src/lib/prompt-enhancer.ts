@@ -4,7 +4,7 @@ import { reverseGeocode } from "./geocoder";
 
 // Use Featherless.ai for high-quality open-source models
 const featherless = createOpenAI({
-  baseURL: "https://api.featherless.ai/v1", // Most providers need /v1
+  baseURL: "https://api.featherless.ai/v1",
   apiKey: process.env.FEATHERLESS_API_KEY,
 });
 

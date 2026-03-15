@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateWorldFromUrl, pollOperation } from "@/lib/marble";
 import { enhancePrompt } from "@/lib/prompt-enhancer";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
+  if (!isSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "Supabase is not configured. Add Supabase credentials to .env.local" },
+      { status: 503 }
+    );
+  }
+
   try {
     const { photoUrl, displayName, photoId, metadata } = await request.json();
 
@@ -63,8 +70,9 @@ export async function POST(request: NextRequest) {
       try {
         const result = await pollOperation(operationId);
         if (result.done && result.world) {
-          const splatUrl = result.world.splatUrls?.full_res || result.world.splatUrls?.["500k"];
-          
+          const splatUrls = result.world.splatUrls || {};
+          const splatUrl = splatUrls.full_res || splatUrls["500k"];
+
           if (photoId) {
             await supabase
               .from("worlds")
@@ -85,7 +93,8 @@ export async function POST(request: NextRequest) {
             caption: result.world.caption,
             thumbnailUrl: result.world.thumbnailUrl,
             panoramaUrl: result.world.panoramaUrl,
-            splatUrl: splatUrl,
+            splatUrl,
+            splatUrls,
           });
         }
       } catch (pollError) {

@@ -11,6 +11,7 @@ export function PhotoUploader({ onPhotosUploaded }: PhotoUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = useCallback(
@@ -26,18 +27,24 @@ export function PhotoUploader({ onPhotosUploaded }: PhotoUploaderProps) {
       }
 
       try {
+        setError(null);
         const res = await fetch("/api/upload-photos", {
           method: "POST",
           body: formData,
         });
 
-        if (!res.ok) throw new Error("Upload failed");
+        const data = await res.json().catch(() => null);
 
-        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || `Upload failed (${res.status})`);
+        }
+
         setUploadProgress(100);
         onPhotosUploaded(data.photos);
-      } catch (error) {
-        console.error("Upload failed:", error);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Upload failed";
+        setError(message);
+        console.error("Upload failed:", message);
       } finally {
         setUploading(false);
         setTimeout(() => setUploadProgress(0), 1000);
@@ -59,7 +66,7 @@ export function PhotoUploader({ onPhotosUploaded }: PhotoUploaderProps) {
 
   return (
     <div
-      className={`relative border transition-all duration-300 p-24 text-center cursor-pointer min-h-[400px] flex flex-col items-center justify-center ${
+      className={`relative border transition-all duration-300 p-6 text-center cursor-pointer ${
         isDragging
           ? "border-main bg-slate-50"
           : "border-dashed border-slate-300 hover:border-main hover:bg-slate-50"
@@ -81,9 +88,15 @@ export function PhotoUploader({ onPhotosUploaded }: PhotoUploaderProps) {
         onChange={(e) => e.target.files && handleUpload(e.target.files)}
       />
 
+      {error && (
+        <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-[10px] uppercase tracking-widest">
+          {error}
+        </div>
+      )}
+
       {uploading ? (
-        <div className="space-y-8 w-full max-w-sm mx-auto">
-          <p className="text-xs uppercase tracking-widest text-primary font-bold">Resurrecting...</p>
+        <div className="space-y-3">
+          <p className="text-[10px] uppercase tracking-widest text-primary font-bold">Uploading...</p>
           <div className="w-full h-[1px] bg-slate-100">
             <div
               className="h-full bg-primary transition-all duration-500 ease-out shadow-[0_0_10px_rgba(230,126,34,0.5)]"
@@ -92,17 +105,12 @@ export function PhotoUploader({ onPhotosUploaded }: PhotoUploaderProps) {
           </div>
         </div>
       ) : (
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <h3 className="text-sm uppercase tracking-widest text-primary font-bold">
-              Gather Memories
-            </h3>
-            <p className="text-xs text-muted max-w-xs mx-auto uppercase tracking-widest leading-loose font-medium">
-              Drop your moments here to bring them back to life.
-            </p>
-          </div>
-          <button className="px-10 py-4 border border-primary text-primary text-xs uppercase tracking-widest font-bold hover:bg-primary hover:text-white transition-all hover:shadow-lg hover:shadow-primary/20">
-            Choose Moments
+        <div className="space-y-3">
+          <p className="text-[10px] text-muted uppercase tracking-widest font-medium">
+            Drop photos here or click to upload
+          </p>
+          <button className="px-6 py-2.5 border border-primary text-primary text-[10px] uppercase tracking-widest font-bold hover:bg-primary hover:text-white transition-all">
+            Add Photos
           </button>
         </div>
       )}

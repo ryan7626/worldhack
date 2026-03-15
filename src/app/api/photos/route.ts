@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { PhotoMetadata } from "@/lib/types";
 
 // Helper to map DB record to PhotoMetadata interface
@@ -28,6 +28,9 @@ function mapPhotoRecord(record: any): PhotoMetadata {
 }
 
 export async function GET(request: NextRequest) {
+  if (!isSupabaseConfigured) {
+    return NextResponse.json({ photos: [] });
+  }
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
   const id = searchParams.get("id");
