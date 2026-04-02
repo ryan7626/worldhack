@@ -4,8 +4,6 @@
 
 Upload images from your life, speak to a voice-native AI guide, search across your personal archive by date or theme, and generate cinematic 3D reconstructions you can open, inspect, and re-style in real time. What begins as a static photo archive becomes a living, spatial memory interface.
 
-Built for **Worlds in Action Hack SF 2026**.
-
 ## Why SceneForge Feels Different
 
 Most photo apps help you store the past.
@@ -400,6 +398,3 @@ It is not just a gallery, not just an AI agent, and not just a 3D demo.
 
 It is a prototype for a new kind of interface where your personal archive becomes navigable, conversational, and spatial.
 
-## License
-
-MIT
